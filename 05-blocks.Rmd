@@ -1,6 +1,6 @@
-# Blocks
+# Mito 5
 
-## Equations
+<font size="6"> **La competencia electoral es alta.**</font>
 
 Here is an equation.
 
