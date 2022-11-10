@@ -1,12 +1,60 @@
-# Parts
+# Mito 3
 
-You can add parts to organize one or more book chapters together. Parts can be inserted at the top of an .Rmd file, before the first-level chapter heading in that same file. 
+<font size="6"> **Los movimientos regionales predominan en la oferta de candidaturas a nivel subnacional**</font>
 
-Add a numbered part: `# (PART) Act one {-}` (followed by `# A chapter`)
 
-Add an unnumbered part: `# (PART\*) Act one {-}` (followed by `# A chapter`)
+```{r,echo=FALSE,warning=FALSE,message=FALSE}
+library(googlesheets4)
+library(dplyr)
+library(ggplot2)
+library(car)
 
-Add an appendix as a special kind of un-numbered part: `# (APPENDIX) Other stuff {-}` (followed by `# A chapter`). Chapters in an appendix are prepended with letters instead of numbers.
+mito3_regional=read.csv("https://docs.google.com/spreadsheets/d/e/2PACX-1vRJdUE26KIgGmrUT8DEUzY5f3JsGlK0-eQdoTeWQw2SPrGpA_bI54jpSDnyE-hBBAoIsBRiAJzoghy-/pub?gid=2080689295&single=true&output=csv", dec = ",")
+
+colnames(mito3_regional)[4]="Por_Participacion"
+colnames(mito3_regional)[5]="Votos_emitidos"
+colnames(mito3_regional)[6]="Votos_validos"
+colnames(mito3_regional)[8]="Tipo_Organizacion_Politica"
+colnames(mito3_regional)[10]="Por_votos"
+colnames(mito3_regional)[11]="Eleccion"
+mito3_regional$Por_votos=as.numeric(mito3_regional$Por_votos)
+mito3_regional$Tipo_Organizacion_Politica= as.factor(mito3_regional$Tipo_Organizacion_Politica)
+mito3_regional$Eleccion= as.factor(mito3_regional$Eleccion)%>%
+  recode("'Regional 2002'='ER2002';'Regional 2006'='ER2006';'Regional 2010'='ER2010';'Regional   
+         2014'='ER2014';'Regional 2018'='ER2018';'Regional 2022'='ER2022'")
+```
+
+
+## Porcentaje de participación de partidos políticos por Eleccion y procedencia
+```{r,echo=FALSE,warning=FALSE,message=FALSE}
+mito3.1_participación_regional=mito3_regional%>% 
+  filter(Vuelta=="Primera")%>%
+  filter(Eleccion=="ER2002"|
+           Eleccion=="ER2006"|
+           Eleccion=="ER2010"|
+           Eleccion=="ER2014"|
+           Eleccion=="ER2018"|
+           Eleccion=="ER2022")%>% 
+  filter(Tipo_Organizacion_Politica=="MOVIMIENTO REGIONAL"|
+           Tipo_Organizacion_Politica=="PARTIDO POLÍTICO"|
+           Tipo_Organizacion_Politica=="ALIANZA ELECTORAL")%>%
+  select(Procedencia,Tipo_Organizacion_Politica,Votos,Eleccion)%>% 
+  group_by(Procedencia, Eleccion, Tipo_Organizacion_Politica)%>% 
+  count(Tipo_Organizacion_Politica)%>%
+  group_by(Procedencia, Eleccion)%>%
+  mutate(total_org_politica = sum(n)) %>% 
+  group_by(Procedencia, Tipo_Organizacion_Politica, Eleccion)%>% 
+  mutate(porcentaje = n/total_org_politica,
+         por_org_politica = porcentaje*100 %>%
+           round(2)) %>%
+  select(Procedencia,Tipo_Organizacion_Politica,por_org_politica, Eleccion) 
+```
+
+```{r,echo=FALSE,warning=FALSE,message=FALSE}
+#Gráfico por procedencia
+ggplot(subset(mito3.1_participación_regional), aes(x=Eleccion, y=por_org_politica, group=Tipo_Organizacion_Politica, color=Tipo_Organizacion_Politica)) +geom_line()+
+  facet_wrap(~ Procedencia)
+```
 
 
 
