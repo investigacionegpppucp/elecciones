@@ -1,7 +1,9 @@
 --- 
-title: "Elecciones Subnacionales"
-author: "John Doe"
-date: "`r Sys.Date()`"
+title: "Mitos y verdades de las Elecciones Subnacionales en Perú"
+author: Área de investigación e incidencia de la Escuela de Gobierno y Políticas Públicas
+  - PUCP
+date: 'Equipo de trabajo: Jorge Aragón, Marylía Cruz, Paolo Sanchez, Valeria Pinchi
+  y Cinthya Villanueva'
 site: bookdown::bookdown_site
 documentclass: book
 bibliography:
@@ -15,17 +17,22 @@ link-citations: yes
 github-repo: rstudio/bookdown-demo
 ---
 
-# About
+# Presentación
 
-This is a _sample_ book written in **Markdown**. You can use anything that Pandoc's Markdown supports; for example, a math equation $a^2 + b^2 = c^2$.
+El Área de Incidencia e Investigación de la EGPP- PUCP presenta “Mitos y verdades de las Elecciones Subnacionales en el Perú”, la cual tiene como objetivo presentar a detalle los principales mitos sobre los últimos seis procesos electorales subnacionales.
 
-## Usage 
+- Elecciones Regionales y Municipales 2002
 
-Each **bookdown** chapter is an .Rmd file, and each .Rmd file can contain one (and only one) chapter. A chapter *must* start with a first-level heading: `# A good chapter`, and can contain one (and only one) first-level heading.
+- Elecciones Regionales y Municipales 2006
 
-Use second-level and higher headings within chapters like: `## A short section` or `### An even shorter section`.
+- Elecciones Regionales y Municipales 2010
 
-The `index.Rmd` file is required, and is also your first book chapter. It will be the homepage when you render the book.
+- Elecciones Regionales y Municipales 2014
+
+- Elecciones Regionales y Municipales 2018
+
+- Elecciones Regionales y Municipales 2022
+
 
 ## Render book
 

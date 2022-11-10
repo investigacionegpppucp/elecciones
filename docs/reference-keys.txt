@@ -1,9 +1,10 @@
-about
-usage
+fig:nice-fig
+tab:nice-tab
+eq:binom
+presentación
 render-book
 preview-book
-elecciones-subnacionales
-a-section
+mito-1
 cross
 chapters-and-sub-chapters
 captioned-figures-and-tables
