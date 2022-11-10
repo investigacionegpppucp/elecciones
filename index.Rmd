@@ -2,8 +2,8 @@
 title: "Mitos y verdades de las Elecciones Subnacionales en Perú"
 author: Área de investigación e incidencia de la Escuela de Gobierno y Políticas Públicas
   - PUCP
-date: 'Equipo de trabajo: Jorge Aragón, Marylía Cruz, Paolo Sanchez, Valeria Pinchi
-  y Cinthya Villanueva'
+date: 'Equipo de trabajo: Jorge Aragón, Marylía Cruz, Karina Alcantara, Paolo Sanchez,
+  Valeria Pinchi y Cinthya Villanueva'
 site: bookdown::bookdown_site
 documentclass: book
 bibliography:
