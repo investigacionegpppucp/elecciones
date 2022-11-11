@@ -34,7 +34,67 @@ library(ggplot2)
 library(gganimate)
 
 grafico=ggplot(data=data3, aes(x=Proceso, y=(PorcentajeParticipacion*100), group=1)) +
-           geom_line(colour = "violet")+
-           geom_point()+labs(y="Porcentaje de participación electoral",x="Proceso Electoral",title = "Participación Electoral en Elecciones Subnacionales",subtitle = "Fuente de datos: ONPE")+theme_minimal()+ylim(70,100)
+           geom_line(colour = "#122c74")+
+           geom_point()+labs(y="Porcentaje de participación electoral",x="Proceso Electoral",title = "Participación Electoral en Elecciones Subnacionales")+theme_minimal()+ylim(70,100)
 grafico
+```
+
+
+```{r,echo=FALSE,warning=FALSE,message=FALSE}
+library(dplyr)
+library(tidyverse)
+colnames(regional)[1]="Region"
+colnames(regional)[4]="Por_Participacion"
+colnames(regional)[5]="Votos_emitidos"
+colnames(regional)[6]="Votos_validos"
+colnames(regional)[7]="Organizacion_politica"
+colnames(regional)[8]="Tipo_organizacion_politica"
+colnames(regional)[10]="Por_votos"
+colnames(regional)[11]="Eleccion"
+regional_mito1 =regional%>% 
+  filter(Vuelta=="Primera")%>%
+  filter(Eleccion=="Regional 2002"|Eleccion=="Regional 2006"|Eleccion=="Regional 2010"|Eleccion=="Regional 2014"|Eleccion=="Regional 2018"|Eleccion=="Regional 2022")%>%
+  select(Region,Votos_emitidos,Votos_validos,Electores,Eleccion)%>%
+  unique()%>%
+  mutate(Votos_novalidos=Votos_emitidos-Votos_validos)%>%
+  mutate(Po_participacion=(Votos_emitidos/Electores)*100)
+```
+
+```{r,echo=FALSE,warning=FALSE,message=FALSE}
+library(car)
+regional_mito1$Eleccion<-recode(regional_mito1$Eleccion, "'Regional 2002'='2002'; 'Regional 2006'='2006'; 'Regional 2010'='2010'; 'Regional 2014'='2014'; 'Regional 2018'='2018';'Regional 2022'='2022'")
+regional_mito1$Eleccion=as.factor(regional_mito1$Eleccion)
+```
+
+```{r,echo=FALSE,warning=FALSE,message=FALSE}
+regional_mito1a=regional_mito1 %>%
+ filter(Region %in% c("AMAZONAS","ANCASH","APURIMAC","AREQUIPA","AYACUCHO","CAJAMARCA","CALLAO","CUSCO","HUANCAVELICA","HUANUCO","ICA","JUNIN"))
+
+regional_mito1b=regional_mito1 %>%
+ filter(Region %in% c("LA LIBERTAD","LAMBAYEQUE","LIMA","LORETO","MADRE DE DIOS","MOQUEGUA","PASCO","PIURA","PUNO","SAN MARTIN","TACNA","TUMBES","UCAYALI"))
+```
+
+```{r,echo=FALSE,warning=FALSE,message=FALSE}
+ggplot(data = regional_mito1a, aes(x = Eleccion, y = Po_participacion, group = Region)) + geom_line(aes(color="#e55555"), show.legend = FALSE) + 
+  geom_point(size = 0.5, shape = 21)+
+  facet_wrap(~Region, ncol = 2)+
+  theme(axis.text = element_text(size=4))+
+  theme(legend.position = "none")+
+  ggtitle("Porcentaje de Participación Electoral en Elecciones Regionales por región")+
+  xlab("Elección")+ 
+  ylab("Porcentaje")+theme_minimal()+theme()+ylim(65,100)
+
+```
+
+
+```{r,echo=FALSE,warning=FALSE,message=FALSE}
+ggplot(data = regional_mito1b, aes(x = Eleccion, y = Po_participacion, group = Region)) + geom_line(aes(color="#e55555"), show.legend = FALSE) + 
+  geom_point(size = 0.5, shape = 21)+
+  facet_wrap(~Region, ncol = 2)+
+  theme(axis.text = element_text(size=4))+
+  theme(legend.position = "none")+
+  ggtitle("Porcentaje de Participación Electoral en Elecciones Regionales por región")+
+  xlab("Elección")+ 
+  ylab("Porcentaje")+theme_minimal()+ylim(65,100)
+
 ```

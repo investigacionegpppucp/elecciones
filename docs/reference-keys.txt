@@ -15,8 +15,7 @@ mito-4
 mito-5
 theorems-and-proofs
 callout-blocks
-sharing-your-book
+mito-6
 publishing
 pages
 metadata-for-sharing
-mito-6
