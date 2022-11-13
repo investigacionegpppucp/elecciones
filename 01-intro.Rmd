@@ -68,16 +68,25 @@ regional_mito1$Eleccion=as.factor(regional_mito1$Eleccion)
 
 ```{r,echo=FALSE,warning=FALSE,message=FALSE}
 regional_mito1a=regional_mito1 %>%
- filter(Region %in% c("AMAZONAS","ANCASH","APURIMAC","AREQUIPA","AYACUCHO","CAJAMARCA","CALLAO","CUSCO","HUANCAVELICA","HUANUCO","ICA","JUNIN"))
+ filter(Region %in% c("AMAZONAS","ANCASH","APURIMAC","AREQUIPA","AYACUCHO"))
 
 regional_mito1b=regional_mito1 %>%
- filter(Region %in% c("LA LIBERTAD","LAMBAYEQUE","LIMA","LORETO","MADRE DE DIOS","MOQUEGUA","PASCO","PIURA","PUNO","SAN MARTIN","TACNA","TUMBES","UCAYALI"))
+ filter(Region %in% c("CAJAMARCA","CALLAO","CUSCO","HUANCAVELICA","HUANUCO"))
+
+regional_mito1c=regional_mito1 %>%
+ filter(Region %in% c("ICA","JUNIN","LA LIBERTAD","LAMBAYEQUE","LIMA"))
+
+regional_mito1d=regional_mito1 %>%
+ filter(Region %in% c("LORETO","MADRE DE DIOS","MOQUEGUA","PASCO","PIURA"))
+
+regional_mito1e=regional_mito1 %>%
+ filter(Region %in% c("PUNO","SAN MARTIN","TACNA","TUMBES","UCAYALI"))
 ```
 
 ```{r,echo=FALSE,warning=FALSE,message=FALSE}
 ggplot(data = regional_mito1a, aes(x = Eleccion, y = Po_participacion, group = Region)) + geom_line(aes(color="#e55555"), show.legend = FALSE) + 
   geom_point(size = 0.5, shape = 21)+
-  facet_wrap(~Region, ncol = 2)+
+  facet_wrap(~Region, ncol = 1)+
   theme(axis.text = element_text(size=4))+
   theme(legend.position = "none")+
   ggtitle("Porcentaje de Participación Electoral en Elecciones Regionales por región")+
@@ -90,7 +99,7 @@ ggplot(data = regional_mito1a, aes(x = Eleccion, y = Po_participacion, group = R
 ```{r,echo=FALSE,warning=FALSE,message=FALSE}
 ggplot(data = regional_mito1b, aes(x = Eleccion, y = Po_participacion, group = Region)) + geom_line(aes(color="#e55555"), show.legend = FALSE) + 
   geom_point(size = 0.5, shape = 21)+
-  facet_wrap(~Region, ncol = 2)+
+  facet_wrap(~Region, ncol = 1)+
   theme(axis.text = element_text(size=4))+
   theme(legend.position = "none")+
   ggtitle("Porcentaje de Participación Electoral en Elecciones Regionales por región")+
