@@ -12,7 +12,14 @@ En el 2002, en 5 regionales , el voto nulo ganó al voto del ganador.
 
 ```{r,echo=FALSE,warning=FALSE,message=FALSE}
 library(googlesheets4)
-regional=read.csv("https://docs.google.com/spreadsheets/d/e/2PACX-1vRJdUE26KIgGmrUT8DEUzY5f3JsGlK0-eQdoTeWQw2SPrGpA_bI54jpSDnyE-hBBAoIsBRiAJzoghy-/pub?gid=2080689295&single=true&output=csv")
+library(dplyr)
+library(ggplot2)
+regional=read.csv("https://docs.google.com/spreadsheets/d/e/2PACX-1vRJdUE26KIgGmrUT8DEUzY5f3JsGlK0-eQdoTeWQw2SPrGpA_bI54jpSDnyE-hBBAoIsBRiAJzoghy-/pub?gid=2080689295&single=true&output=csv", dec = ",")
+
+#str(regional)
+```
+
+```{r, echo=FALSE,warning=FALSE,message=FALSE}
 colnames(regional)[1]="Region"
 colnames(regional)[4]="Por_Participacion"
 colnames(regional)[5]="Votos_emitidos"
@@ -21,8 +28,7 @@ colnames(regional)[7]="Organizacion_politica"
 colnames(regional)[8]="Tipo_organizacion_politica"
 colnames(regional)[10]="Por_votos"
 colnames(regional)[11]="Eleccion"
-library(dplyr)
-library(ggplot2)
+regional[,c(3,5,6,9)]=lapply(regional[,c(3,5,6,9)],as.numeric)  
 ```
 
 ```{r,echo=FALSE,warning=FALSE,message=FALSE}
@@ -33,20 +39,21 @@ regional_mito4 =regional%>%
   unique()%>%
   group_by(Eleccion)%>%
   summarise(Votos_emitidos_total=sum(Votos_emitidos), Votos_validos_total=sum(Votos_validos))%>%
-  mutate(Votos_novalidos=Votos_emitidos_total-Votos_validos_total)%>%
-  mutate(Por_votos_novalidos=(Votos_novalidos/Votos_emitidos_total)*100)%>%
+  mutate(Votos_novalidos=(Votos_emitidos_total-Votos_validos_total)*100)%>%
+  mutate(Por_votos_novalidos=Votos_novalidos/Votos_emitidos_total)%>%
   mutate(elecciones=c("2002","2006","2010","2014","2018","2022"))
-
 ```
 
 ```{r,echo=FALSE,warning=FALSE,message=FALSE}
 ggplot(regional_mito4, aes(x=elecciones, y=Por_votos_novalidos, group=1)) +
   geom_line(colour = "blue")+
   geom_point()+
-  ggtitle("Porcentaje de Votos no válidos (blanco+nulo) en Elecciones Regionales")+
+  ggtitle("Porcentaje de Votos no válidos en Elecciones Regionales", subtitle = "Votos no válidos = votos en blanco + votos nulos")+
   xlab("Proceso Electoral")+
-  ylab("Porcentaje de Votos no válidos")+theme_minimal()+ylim(0,25)
+  ylab("Porcentaje de Votos no válidos")+theme_minimal()+
+  ylim(0,25)
 
+#ggsave("4_regional_general.png")
 ```
 
 ### Porcentaje de votos no válidos por cada región
@@ -58,7 +65,9 @@ regional_mito4.1 =regional%>%
   select(Region,Votos_emitidos,Votos_validos,Eleccion)%>%
   unique()%>%
   mutate(Votos_novalidos=Votos_emitidos-Votos_validos)%>%
-  mutate(Por_votos_novalidos=(Votos_novalidos/Votos_emitidos)*100)
+  mutate(Por_votos_novalidos=(Votos_novalidos/Votos_emitidos)*100)%>%
+  mutate(grupo= ifelse(Region=="AMAZONAS", "BAJAN", ifelse(Region=="AREQUIPA", "BAJAN", ifelse(Region=="APURIMAC", "BAJAN", ifelse(Region=="CAJAMARCA", "BAJAN", ifelse(Region=="CALLAO", "BAJAN", ifelse(Region=="CUSCO", "BAJAN", ifelse(Region=="LA LIBERTAD", "BAJAN", ifelse( Region=="LIMA", "BAJAN", ifelse(Region=="LORETO", "BAJAN", ifelse(Region=="MADRE DE DIOS", "BAJAN", ifelse(Region=="MOQUEGUA", "BAJAN", ifelse(Region=="PIURA", "BAJAN", ifelse(Region=="SAN MARTIN", "BAJAN", ifelse(Region=="TACNA","BAJAN", ifelse(Region=="PUNO", "BAJAN", "SUBEN"))))))))))))))))
+
 ```
 
 ```{r,echo=FALSE,warning=FALSE,message=FALSE}
@@ -75,33 +84,38 @@ regional_mito4.1b=regional_mito4.1 %>%
  filter(Region %in% c("LA LIBERTAD","LAMBAYEQUE","LIMA","LORETO","MADRE DE DIOS","MOQUEGUA","PASCO","PIURA","PUNO","SAN MARTIN","TACNA","TUMBES","UCAYALI"))
 ```
 
-
-
-
 ```{r,echo=FALSE,warning=FALSE,message=FALSE}
-ggplot(data = regional_mito4.1a, aes(x = Eleccion, y = Por_votos_novalidos, group = Region)) + 
-  geom_line(aes(color = Region)) + 
+ggplot(data = regional_mito4.1a, aes(x = Eleccion, y = Por_votos_novalidos, group = Region))+ 
+  geom_line(aes(color=grupo)) +
   geom_point(size = 0.5, shape = 21)+
-  facet_wrap(~Region, ncol = 2)+
-  theme(axis.text = element_text(size=4))+
-  theme(legend.position = "none")+
+  facet_wrap(~Region, ncol = 3)+
   ggtitle("Porcentaje de Votos no válidos en Elecciones Regionales por región")+
   xlab("Elección")+ 
-  ylab("Porcentaje")+theme_minimal()+theme(legend.text = element_text(colour="black", size=6))
+  ylab("Porcentaje")+theme_minimal()+
+  scale_color_manual(values =  c("#E55555", "#156C99"), labels = c("Descenso de votos no válidos","Ascenso de votos no válidos"), guide = guide_legend(reverse = TRUE))+
+  labs(color = "Tendencia al 2022")+
+  theme(axis.text = element_text(size=7))+
+  theme(legend.text = element_text(colour="black", size=7))+
+  theme(legend.title = element_text(color = "black", size = 7))
 
+#ggsave("4_regional_regionA.png")
 ```
 
 ```{r,echo=FALSE,warning=FALSE,message=FALSE}
-ggplot(data = regional_mito4.1b, aes(x = Eleccion, y = Por_votos_novalidos, group = Region)) + 
-  geom_line(aes(color = Region)) + 
+ggplot(data = regional_mito4.1b, aes(x = Eleccion, y = Por_votos_novalidos, group = Region))+ 
+  geom_line(aes(color=grupo)) +
   geom_point(size = 0.5, shape = 21)+
-  facet_wrap(~Region, ncol = 2)+
-  theme(axis.text = element_text(size=4))+
-  theme(legend.position = "none")+
+  facet_wrap(~Region, ncol = 4)+
   ggtitle("Porcentaje de Votos no válidos en Elecciones Regionales por región")+
   xlab("Elección")+ 
-  ylab("Porcentaje")+theme_minimal()+theme(legend.text = element_text(colour="black", size=6))
+  ylab("Porcentaje")+theme_minimal()+
+  scale_color_manual(values =  c("#E55555", "#156C99"), labels = c("Descenso de votos no válidos","Ascenso de votos no válidos"), guide = guide_legend(reverse = TRUE))+
+  labs(color = "Tendencia al 2022")+
+  theme(axis.text = element_text(size=5))+
+  theme(legend.text = element_text(colour="black", size=7))+
+  theme(legend.title = element_text(color = "black", size = 7))
 
+#ggsave("4_regional_regionB.png")
 ```
 
 ### Porcentaje de votos no válidos versus Porcentaje de votos por la organización política ganadora en las Elecciones Regionales
@@ -113,9 +127,9 @@ regional_mito4.2 =regional%>%
   filter(Organizacion_politica != "VOTOS EN BLANCO" & Organizacion_politica != "VOTOS NULOS")%>%
   select(Region,Votos_emitidos,Votos_validos,Organizacion_politica, Votos, Eleccion)%>%
   group_by(Region,Eleccion)%>%
-  filter (Votos == max (Votos, na.rm = TRUE))%>%
+  slice (which.max (Votos))%>%
   mutate(Votos_novalidos=Votos_emitidos-Votos_validos)%>%
-  mutate(Comparacion=Votos>Votos_novalidos)
+  mutate(Comparacion= ifelse(Votos>Votos_novalidos, "ORGANIZACION POLITICA", ifelse(Votos<Votos_novalidos, "NO VALIDOS", "EMPATE")))
 ```
 
 ```{r,echo=FALSE,warning=FALSE,message=FALSE}
@@ -125,22 +139,26 @@ regional_mito4.2$Eleccion=as.factor(regional_mito4.2$Eleccion)
 ```
 
 ```{r,echo=FALSE,warning=FALSE,message=FALSE}
-
 ggplot(regional_mito4.2, aes(x = Eleccion, fill = Comparacion)) + 
   geom_bar()+
   ggtitle("Número de regiones con predominio de votos no válidos")+
   xlab("Elección")+ 
   ylab("Número de regiones")+
-  scale_fill_hue(labels = c("Votos no válidos","Organizaicón política"))+
+  scale_fill_manual(values = c("#E55555", "#156C99"), labels = c("Votos no válidos","Organización política"), guide = guide_legend(reverse = TRUE))+
   labs(fill = "% más alto:")+theme_minimal()
-
+#ggsave("4_regional_comparacion.png")
 ```
+
 
 
 ## Elecciones Provinciales
 
 ```{r,echo=FALSE,warning=FALSE,message=FALSE}
-provincial=read.csv("https://docs.google.com/spreadsheets/d/e/2PACX-1vQUlZR5ccTPZzM1Uleflp7gomwKqGI3PCo4DijVl42CXoGl2WwVv7HBr0GJffWILL5b0nwkpP2XfPVF/pub?gid=2059395285&single=true&output=csv")
+provincial=read.csv("https://docs.google.com/spreadsheets/d/e/2PACX-1vQUlZR5ccTPZzM1Uleflp7gomwKqGI3PCo4DijVl42CXoGl2WwVv7HBr0GJffWILL5b0nwkpP2XfPVF/pub?gid=2059395285&single=true&output=csv", dec = ",")
+str(provincial)
+```
+
+```{r, echo=FALSE,warning=FALSE,message=FALSE}
 colnames(provincial)[1]="Region"
 colnames(provincial)[4]="Por_Participacion"
 colnames(provincial)[5]="Votos_emitidos"
@@ -149,8 +167,8 @@ colnames(provincial)[7]="Organizacion_politica"
 colnames(provincial)[8]="Tipo_organizacion_politica"
 colnames(provincial)[10]="Por_votos"
 colnames(provincial)[11]="Eleccion"
+provincial[,c(3,5,6,9)]=lapply(provincial[,c(3,5,6,9)],as.numeric) 
 ```
-
 
 
 ```{r,echo=FALSE,warning=FALSE,message=FALSE}
@@ -171,12 +189,12 @@ provincial_mito4$Eleccion=as.factor(provincial_mito4$Eleccion)
 
 ```{r,echo=FALSE,warning=FALSE,message=FALSE}
 ggplot(provincial_mito4, aes(x=Eleccion, y=Por_votos_novalidos, group=1)) +
-  geom_line()+
+  geom_line(colour = "blue")+
   geom_point()+
-  ggtitle("Porcentaje de Votos no válidos en Elecciones Provinciales")+
-  xlab("Elección")+ 
-  ylab("Porcentaje")+theme_minimal()+ylim(0,25)
-
+  ggtitle("Porcentaje de Votos no válidos en Elecciones Provinciales",  subtitle = "Votos no válidos = votos en blanco + votos nulos")+
+  xlab("Proceso Electoral")+ 
+  ylab("Porcentaje de Votos no válidos")+theme_minimal()+ylim(0,25)
+#ggsave("4_provincial_general.png")
 ```
 
 
@@ -185,16 +203,14 @@ ggplot(provincial_mito4, aes(x=Eleccion, y=Por_votos_novalidos, group=1)) +
 
 ```{r,echo=FALSE,warning=FALSE,message=FALSE}
 provincial_mito4.2 =provincial%>% 
-  select(Region,Provincia,Votos_emitidos,Votos_validos,Organizacion_politica, Votos, Eleccion)%>%
+  select(Region,Provincia,Votos_emitidos,Votos_validos,Organizacion_politica, Votos, Eleccion, UBIGEO)%>%
+  filter(Organizacion_politica != "VOTOS EN BLANCO" & Organizacion_politica != "VOTOS NULOS")%>%
   group_by(Region, Provincia,Eleccion)%>%
   slice (which.max (Votos))%>%   #por si hay empates   filter (Votos == max (Votos, na.rm = TRUE))%>% incluye empate
   mutate(Votos_novalidos=Votos_emitidos-Votos_validos)%>%
-  mutate(Comparacion=Votos>Votos_novalidos)
+  mutate(Comparacion= ifelse(Votos>Votos_novalidos, "ORGANIZACION POLITICA", ifelse(Votos<Votos_novalidos, "NO VALIDOS", "EMPATE")))
 ```
 
-```{r,echo=FALSE,warning=FALSE,message=FALSE}
-#table(provincial_mito4.2$Comparacion, provincial_mito4.2$Eleccion)
-```
 ```{r,echo=FALSE,warning=FALSE,message=FALSE}
 library(car)
 provincial_mito4.2$Eleccion<-recode(provincial_mito4.2$Eleccion, "'Provincial 2002'='2002'; 'Provincial 2006'='2006'; 'Provincial 2010'='2010'; 'Provincial 2014'='2014'; 'Provincial 2018'='2018';'Provincial 2022'='2022'")
@@ -203,21 +219,25 @@ provincial_mito4.2$Eleccion=as.factor(provincial_mito4.2$Eleccion)
 
 ```{r,echo=FALSE,warning=FALSE,message=FALSE}
 ggplot(provincial_mito4.2, aes(x = Eleccion, fill = Comparacion)) + 
-  geom_bar()+
-  ggtitle("Número de provincias con predominio de votos no válidos")+
+  geom_bar(position = "fill")+
+  ggtitle("Porcentaje de provincias con predominio de votos no válidos")+
   xlab("Elección")+ 
-  ylab("Número de provincias")+
-  scale_fill_hue(labels = c("Votos no válidos","Organización política"))+
-  labs(fill = "% más alto:")+theme_minimal()
-
+  ylab("Provincias (%)")+
+  scale_fill_manual(values = c("#E55555", "#156C99"), labels = c("Votos no válidos","Organización política"), guide = guide_legend(reverse = TRUE))+
+  labs(fill = "% más alto:")+theme_minimal()+
+  scale_y_continuous(labels = scales::percent)
+#ggsave("4_provincial_comparacion.png")
 ```
-
 
 
 ## Elecciones Distritales
 
 ```{r,echo=FALSE,warning=FALSE,message=FALSE}
-distrital=read.csv("https://docs.google.com/spreadsheets/d/e/2PACX-1vQMLHdXuz-ykbp9VmJJGhtl0vdNeeMxjgod2YrYLt9UB3RdX8tb-LEbZr2PVV41Sj384LuK1quysfNj/pub?output=csv")
+distrital=read.csv("https://docs.google.com/spreadsheets/d/e/2PACX-1vQMLHdXuz-ykbp9VmJJGhtl0vdNeeMxjgod2YrYLt9UB3RdX8tb-LEbZr2PVV41Sj384LuK1quysfNj/pub?output=csv", dec=',')
+
+```
+
+```{r, echo=FALSE,warning=FALSE,message=FALSE}
 colnames(distrital)[1]="Region"
 colnames(distrital)[5]="Por_Participacion"
 colnames(distrital)[6]="Votos_emitidos"
@@ -226,8 +246,10 @@ colnames(distrital)[8]="Organizacion_politica"
 colnames(distrital)[9]="Tipo_organizacion_politica"
 colnames(distrital)[11]="Por_votos"
 colnames(distrital)[12]="Eleccion"
+distrital$Por_Participacion <- sub(",", ".", distrital$Por_Participacion, fixed = TRUE)
+distrital$Por_votos <- sub(",", ".", distrital$Por_votos, fixed = TRUE)
+distrital[,c(4,5,6,7,10,11)]=lapply(distrital[,c(4,5,6,7,10,11)],as.numeric)
 ```
-
 
 ```{r,echo=FALSE,warning=FALSE,message=FALSE}
 distrital_mito4 =distrital%>% 
@@ -240,38 +262,49 @@ distrital_mito4 =distrital%>%
 ```
 
 ```{r,echo=FALSE,warning=FALSE,message=FALSE}
-ggplot(distrital_mito4, aes(x=Eleccion, y=Por_votos_novalidos, group=1)) +
-  geom_line()+
-  geom_point()+
-  ggtitle("Porcentaje de Votos no válidos en Elecciones Distritales")+
-  xlab("Elección")+ 
-  ylab("Porcentaje")+theme_minimal()+ylim(0,25)
+library(car)
+distrital_mito4$Eleccion<-recode(distrital_mito4$Eleccion, "'Distrital 2002'='2002'; 'Distrital 2006'='2006'; 'Distrital 2010'='2010'; 'Distrital 2014'='2014'; 'Distrital 2018'='2018';'Distrital 2022'='2022'")
+distrital_mito4$Eleccion=as.factor(distrital_mito4$Eleccion)
+```
 
+```{r,echo=FALSE,warning=FALSE,message=FALSE}
+ggplot(distrital_mito4, aes(x=Eleccion, y=Por_votos_novalidos, group=1)) +
+  geom_line(colour="blue")+
+  geom_point()+
+  ggtitle("Porcentaje de Votos no válidos en Elecciones Distritales", subtitle = "Votos no válidos = votos en blanco + votos nulos")+
+  xlab("Proceso Electoral")+ 
+  ylab("Porcentaje de votos no válidos")+theme_minimal()+ylim(0,25)
+#ggsave("4_distrital_general.png")
 ```
 
 ### Porcentaje de votos no válidos versus Porcentaje de votos por la organización política ganadora en las Elecciones Distritales
 
 
-NOTA: EL CODIGO ESTÁ TENIENDO PROBLEMAS
-
 ```{r,echo=FALSE,warning=FALSE,message=FALSE}
 distrital_mito4.2 =distrital%>% 
   select(Region,Provincia,Distrito,Votos_emitidos,Votos_validos,Organizacion_politica, Votos, Eleccion)%>%
+  filter(Organizacion_politica != "VOTOS EN BLANCO" & Organizacion_politica != "VOTOS NULOS")%>%
   group_by(Provincia,Distrito,Eleccion)%>%
-  filter (Votos == max (Votos, na.rm = TRUE))%>%
+  slice (which.max (Votos))%>%
   mutate(Votos_novalidos=Votos_emitidos-Votos_validos)%>%
-  mutate(Comparacion=Votos>Votos_novalidos)
+  mutate(Comparacion= ifelse(Votos>Votos_novalidos, "ORGANIZACION", ifelse(Votos<Votos_novalidos, "NO VALIDOS", "EMPATE")))
 ```
 
+```{r,echo=FALSE,warning=FALSE,message=FALSE}
+library(car)
+distrital_mito4.2$Eleccion<-recode(distrital_mito4.2$Eleccion, "'Distrital 2002'='2002'; 'Distrital 2006'='2006'; 'Distrital 2010'='2010'; 'Distrital 2014'='2014'; 'Distrital 2018'='2018';'Distrital 2022'='2022'")
+distrital_mito4.2$Eleccion=as.factor(distrital_mito4.2$Eleccion)
+```
 
 ```{r,echo=FALSE,warning=FALSE,message=FALSE}
 ggplot(distrital_mito4.2, aes(x = Eleccion, fill = Comparacion)) + 
-  geom_bar()+
-  ggtitle("Número de distritos con predominio de votos no válidos")+
+  geom_bar(position = "fill")+
+  ggtitle("Porcentaje de distritos con predominio de votos no válidos")+
   xlab("Elección")+ 
-  ylab("Número de distritos")+
-  scale_fill_hue(labels = c("Votos no válidos","Organizaicón política"))+
-  labs(fill = "Ganador")+theme_minimal()
+  ylab("Distritos (%)")+
+  scale_fill_manual(values = c( "#55BA77","#E55555", "#156C99"), labels = c("Empate", "Votos no válidos","Organización política"), guide = guide_legend(reverse = TRUE))+
+  labs(fill = "% más alto:")+theme_minimal()+
+  scale_y_continuous(labels = scales::percent)
 
-#ggsave("comparacion_prov.png")
+#ggsave("4_distrital_comparacion.png")
 ```

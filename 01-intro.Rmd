@@ -35,7 +35,7 @@ library(gganimate)
 
 grafico=ggplot(data=data3, aes(x=Proceso, y=(PorcentajeParticipacion*100), group=1)) +
            geom_line(colour = "#122c74")+
-           geom_point()+labs(y="Porcentaje de participación electoral",x="Proceso Electoral",title = "Participación Electoral en Elecciones Subnacionales")+theme_minimal()+ylim(70,100)
+           geom_point()+labs(y="Porcentaje de participación electoral",x="Proceso Electoral",title = "Participación Electoral en Elecciones Subnacionales")+theme_minimal()+ylim(0,100)
 grafico
 ```
 
